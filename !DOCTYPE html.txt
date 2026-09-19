@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Smart Daily Routine Reminder</title>
+
+<style>
+
+body{
+    font-family:Arial, sans-serif;
+    background:linear-gradient(120deg,#667eea,#764ba2);
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+
+.container{
+
+    background:white;
+    width:420px;
+    padding:25px;
+    border-radius:20px;
+    box-shadow:0 0 20px black;
+
+}
+
+
+h1{
+
+    text-align:center;
+    color:#333;
+
+}
+
+
+input{
+
+    width:90%;
+    padding:12px;
+    margin:8px;
+    border-radius:10px;
+    border:1px solid gray;
+    font-size:16px;
+
+}
+
+
+button{
+
+    padding:10px 15px;
+    background:#667eea;
+    color:white;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+
+}
+
+
+button:hover{
+
+    background:#764ba2;
+
+}
+
+
+
+.activity{
+
+    background:#eeeeee;
+    padding:12px;
+    margin-top:12px;
+    border-radius:12px;
+
+}
+
+
+.completed{
+
+    background:#b8f5b8;
+    text-decoration:line-through;
+
+}
+
+
+.delete{
+
+    background:red;
+    float:right;
+
+}
+
+
+
+</style>
+
+</head>
+
+
+
+<body>
+
+
+
+<div class="container">
+
+
+<h1>⏰ Daily Routine</h1>
+
+
+<input id="task" placeholder="Enter activity">
+
+
+<input id="time" type="time">
+
+
+<button onclick="addTask()">
+Add Activity
+</button>
+
+
+
+<h3>Today's Routine</h3>
+
+
+<div id="list"></div>
+
+
+</div>
+
+
+
+
+<script>
+
+
+let tasks =
+JSON.parse(localStorage.getItem("routine")) || [];
+
+
+
+let today =
+new Date().toDateString();
+
+
+
+
+
+function convertTime(time){
+
+
+let parts=time.split(":");
+
+
+let hour=parseInt(parts[0]);
+
+let minute=parts[1];
+
+
+let ampm=hour>=12?"PM":"AM";
+
+
+hour=hour%12;
+
+
+if(hour==0)
+hour=12;
+
+
+return hour+":"+minute+" "+ampm;
+
+
+}
+
+
+
+
+
+function addTask(){
+
+
+let name=document.getElementById("task").value;
+
+let time=document.getElementById("time").value;
+
+
+
+if(name=="" || time==""){
+
+alert("Please enter activity and time");
+
+return;
+
+}
+
+
+
+tasks.push({
+
+name:name,
+
+time:time,
+
+lastCompleted:"",
+
+repeat:true
+
+});
+
+
+
+save();
+
+
+
+document.getElementById("task").value="";
+
+
+}
+
+
+
+
+
+function save(){
+
+
+localStorage.setItem(
+
+"routine",
+
+JSON.stringify(tasks)
+
+);
+
+
+display();
+
+
+}
+
+
+
+
+
+function display(){
+
+
+let list=document.getElementById("list");
+
+
+list.innerHTML="";
+
+
+
+tasks.forEach((task,index)=>{
+
+
+let done =
+task.lastCompleted==today;
+
+
+
+let div=document.createElement("div");
+
+
+div.className="activity";
+
+
+
+if(done){
+
+div.classList.add("completed");
+
+}
+
+
+
+div.innerHTML=`
+
+<b>${task.name}</b>
+
+<br>
+
+⏰ ${convertTime(task.time)}
+
+<br><br>
+
+
+<button onclick="completeTask(${index})">
+
+${done?"Completed":"Done"}
+
+</button>
+
+
+
+<button class="delete"
+onclick="deleteTask(${index})">
+
+Delete
+
+</button>
+
+`;
+
+
+
+list.appendChild(div);
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+function completeTask(index){
+
+
+tasks[index].lastCompleted=today;
+
+
+save();
+
+
+}
+
+
+
+
+
+function deleteTask(index){
+
+
+tasks.splice(index,1);
+
+
+save();
+
+
+}
+
+
+
+
+
+// Reminder system
+
+setInterval(()=>{
+
+
+let now=new Date();
+
+
+
+let currentTime =
+
+String(now.getHours()).padStart(2,"0")
++
+":"
++
+String(now.getMinutes()).padStart(2,"0");
+
+
+
+tasks.forEach(task=>{
+
+
+if(task.time==currentTime){
+
+
+alert(
+
+"🔔 REMINDER\n\n"+
+task.name+
+"\n⏰ "+
+convertTime(task.time)
+
+);
+
+
+}
+
+
+});
+
+
+
+},60000);
+
+
+
+
+
+display();
+
+
+
+</script>
+
+
+</body>
+
+</html>
